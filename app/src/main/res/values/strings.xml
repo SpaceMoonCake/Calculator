@@ -17,4 +17,5 @@
     <string name="division">/</string>
     <string name="equally">=</string>
     <string name="night_theme">Night theme</string>
+    <string name="day_theme">Day theme</string>
 </resources>
