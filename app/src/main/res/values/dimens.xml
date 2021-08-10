@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="textSizeOnButton">30sp</dimen>
+    <dimen name="textSizeResultCalculation">50sp</dimen>
+    <dimen name="textSizeCalculationText">30sp</dimen>
+    <dimen name="marginForButtonCalculation">3dp</dimen>
+</resources>

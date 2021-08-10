@@ -3,10 +3,14 @@ package com.example.calculator;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
+
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,15 +24,20 @@ public class MainActivity extends AppCompatActivity {
             R.id.button_number_eight, R.id.button_number_nine, R.id.button_sign_equally,
             R.id.button_sign_minus, R.id.button_sign_plus, R.id.button_sign_division,
             R.id.button_sign_multiply, R.id.button_number_two};
+    private int NIGHT_THEME = 0;
+    private static final String NameSharedPreference = "SETTINGS_THEME";
+    private static final String appTheme = "APP_THEME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(getAppTheme());
         setContentView(R.layout.activity_main);
         calculationText = findViewById(R.id.calculation_text);
         resultCalculationView = findViewById(R.id.resultCalculation);
         calculator = new Calculator(calculationText, resultCalculationView);
         setNumberButtonListeners();
+        initSwitchThemeButton();
     }
 
     @Override
@@ -60,5 +69,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void initSwitchThemeButton() {
+        findViewById(R.id.switchTheme).setOnClickListener(view -> {
+            NIGHT_THEME = 1;
+            setAppTheme(NIGHT_THEME);
+            recreate();
+        });
+    }
+
+    private int getAppTheme() {
+        if (NIGHT_THEME == 1) {
+            return R.style.themeNight;
+        } else {
+            return R.style.themeDay;
+        }
+    }
+
+    private void setAppTheme(int theme){
+            SharedPreferences sharedPref = getSharedPreferences(NameSharedPreference, MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt(appTheme, theme);
+            editor.apply();
     }
 }
