@@ -1,11 +1,13 @@
 package com.example.calculator;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.widget.TextView;
 
 import java.io.Serializable;
 
-public class Calculator implements Serializable {
+public class Calculator implements Parcelable {
     private Editable calculationString;
     private StringBuilder definitionNumber = new StringBuilder("");
     private int numberFirst;
@@ -14,17 +16,46 @@ public class Calculator implements Serializable {
     private String operation;
     private Integer resultCalculation;
     private TextView resultCalculationView;
-    private final String SIGN_PLUS = "+";
-    private final String SIGN_MINUS = "-";
-    private final String SIGN_MULTIPLY = "*";
-    private final String SIGN_DIVISION = "/";
-    private final String SIGN_EQUALLY = "=";
+    private String SIGN_PLUS = "+";
+    private String SIGN_MINUS = "-";
+    private String SIGN_MULTIPLY = "*";
+    private String SIGN_DIVISION = "/";
+    private String SIGN_EQUALLY = "=";
     private String errorMassage = "Упс! Что-то пошло не так :(";
 
     Calculator(TextView calculationText, TextView resultCalculationView) {
         this.calculationText = calculationText;
         this.resultCalculationView = resultCalculationView;
     }
+
+    protected Calculator(Parcel in) {
+        numberFirst = in.readInt();
+        numberSecond = in.readInt();
+        operation = in.readString();
+        if (in.readByte() == 0) {
+            resultCalculation = null;
+        } else {
+            resultCalculation = in.readInt();
+        }
+        SIGN_PLUS = in.readString();
+        SIGN_MINUS = in.readString();
+        SIGN_MULTIPLY = in.readString();
+        SIGN_DIVISION = in.readString();
+        SIGN_EQUALLY = in.readString();
+        errorMassage = in.readString();
+    }
+
+    public static final Creator<Calculator> CREATOR = new Creator<Calculator>() {
+        @Override
+        public Calculator createFromParcel(Parcel in) {
+            return new Calculator(in);
+        }
+
+        @Override
+        public Calculator[] newArray(int size) {
+            return new Calculator[size];
+        }
+    };
 
     public TextView getCalculationText(){
         return calculationText;
@@ -78,20 +109,43 @@ public class Calculator implements Serializable {
 
     private void calculation() throws ArithmeticException {
         switch (operation) {
-            case (SIGN_PLUS):
+            case ("+"):
                 resultCalculation = numberFirst + numberSecond;
                 break;
-            case (SIGN_MINUS):
+            case ("-"):
                 resultCalculation = numberFirst - numberSecond;
                 break;
-            case (SIGN_MULTIPLY):
+            case ("*"):
                 resultCalculation = numberFirst * numberSecond;
                 break;
-            case (SIGN_DIVISION):
+            case ("/"):
                     resultCalculation = numberFirst / numberSecond;
                 break;
         }
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(numberFirst);
+        parcel.writeInt(numberSecond);
+        parcel.writeString(operation);
+        if (resultCalculation == null) {
+            parcel.writeByte((byte) 0);
+        } else {
+            parcel.writeByte((byte) 1);
+            parcel.writeInt(resultCalculation);
+        }
+        parcel.writeString(SIGN_PLUS);
+        parcel.writeString(SIGN_MINUS);
+        parcel.writeString(SIGN_MULTIPLY);
+        parcel.writeString(SIGN_DIVISION);
+        parcel.writeString(SIGN_EQUALLY);
+        parcel.writeString(errorMassage);
+    }
 }
