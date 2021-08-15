@@ -1,10 +1,13 @@
 package com.example.calculator;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.SyncStateContract;
 import android.text.Editable;
 import android.widget.Button;
 import android.widget.Switch;
@@ -24,32 +27,45 @@ public class MainActivity extends AppCompatActivity {
             R.id.button_number_eight, R.id.button_number_nine, R.id.button_sign_equally,
             R.id.button_sign_minus, R.id.button_sign_plus, R.id.button_sign_division,
             R.id.button_sign_multiply, R.id.button_number_two};
-    private int NIGHT_THEME = 0;
-    private static final String NameSharedPreference = "SETTINGS_THEME";
-    private static final String appTheme = "APP_THEME";
+
+    private final int codeChangeTheme = 99;
+    private static final String NameSharedPreference = "SETTINGS";
+    private static final String idAppTheme = "ID_THEME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(getAppTheme());
+        setAppTheme();
         setContentView(R.layout.activity_main);
+        initView();
+    }
+
+    private void setAppTheme() {
+            SharedPreferences sharedPref = getSharedPreferences(NameSharedPreference, MODE_PRIVATE);
+            setTheme(sharedPref.getInt(idAppTheme, R.style.themeDay));
+    }
+
+    private void initView() {
         calculationText = findViewById(R.id.calculation_text);
         resultCalculationView = findViewById(R.id.resultCalculation);
         calculator = new Calculator(calculationText, resultCalculationView);
         setNumberButtonListeners();
-        initSwitchThemeButton();
+        findViewById(R.id.settings_button).setOnClickListener(view -> {
+            Intent intentForSettingsActivity = new Intent(this, Settings.class);
+            startActivityForResult(intentForSettingsActivity, codeChangeTheme);
+        });
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(KEY_SAVE, calculator);
+        outState.putParcelable(KEY_SAVE, calculator);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        calculator = (Calculator) savedInstanceState.getSerializable(KEY_SAVE);
+        calculator = (Calculator) savedInstanceState.getParcelable(KEY_SAVE);
         updateData();
     }
 
@@ -71,26 +87,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initSwitchThemeButton() {
-        findViewById(R.id.switchTheme).setOnClickListener(view -> {
-            NIGHT_THEME = 1;
-            setAppTheme(NIGHT_THEME);
-            recreate();
-        });
-    }
-
-    private int getAppTheme() {
-        if (NIGHT_THEME == 1) {
-            return R.style.themeNight;
-        } else {
-            return R.style.themeDay;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode != codeChangeTheme) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
         }
-    }
 
-    private void setAppTheme(int theme){
-            SharedPreferences sharedPref = getSharedPreferences(NameSharedPreference, MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putInt(appTheme, theme);
-            editor.apply();
+        if (resultCode == RESULT_OK) {
+            assert data != null;
+            recreate();
+        }
     }
 }
